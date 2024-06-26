@@ -1,5 +1,5 @@
 // repositoryFactory.ts
-import { PrismaUserRepository } from "./PrismaUserRepository"
+// import { PrismaUserRepository } from "./PrismaUserRepository"
 import { FirestoreUserRepository } from "./FirestoreUserRepository"
 import { UserRepository } from "../../interfaces/user"
 
@@ -8,7 +8,7 @@ function createUserRepository(): UserRepository {
 
   switch (dbType) {
     case "prisma":
-      return new PrismaUserRepository()
+    // return new PrismaUserRepository()
     case "firestore":
       return new FirestoreUserRepository()
     default:
