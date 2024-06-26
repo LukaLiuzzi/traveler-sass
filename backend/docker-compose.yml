@@ -1,0 +1,14 @@
+version: '3'
+services:
+  backend:
+    build:
+      context: .   # Ruta al Dockerfile
+      dockerfile: dockerfile.dev
+    volumes:
+      - .:/app     # Monta el directorio de tu proyecto en /app dentro del contenedor
+      - /app/node_modules # Evita que se sobrescriban los módulos de node en el contenedor
+    ports:
+      - "8080:8080"  # Mapeo de puertos (puerto del contenedor : puerto del host)
+    command: npm run dev # Usa el comando de desarrollo
+    environment:
+      - NODE_ENV=development
