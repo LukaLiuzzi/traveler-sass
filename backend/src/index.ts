@@ -1,7 +1,7 @@
 import express, { Application, Request, Response } from "express"
-
+import cors from "cors"
 class Server {
-  private app: Application
+  public app: Application
   private port: number
 
   constructor(port: number) {
@@ -13,6 +13,8 @@ class Server {
 
   private configureMiddlewares(): void {
     this.app.use(express.json())
+    this.app.use(express.urlencoded({ extended: true }))
+    this.app.use(cors())
   }
 
   private configureRoutes(): void {
@@ -30,3 +32,5 @@ class Server {
 
 const server = new Server(8080)
 server.start()
+
+export { Server }
