@@ -1,16 +1,6 @@
-import { BaseUser, Employee, Owner, Client } from "./user"
+import { User } from "./user"
 
-export interface AuthAdminRepository<Employee, Owner> {
-  register(user: Employee): Promise<Omit<Employee, "password">>
-  //   login(email: string, password: string): Promise<Omit<Owner, "password">>
-}
-
-export interface AuthClientRepository<Client> {
-  register(user: Client): Promise<Omit<Client, "password">>
-  login(email: string, password: string): Promise<Omit<Client, "password">>
-}
-
-export interface AuthSuperAdminRepository<SuperAdmin, Owner> {
-  register(user: Owner): Promise<Omit<Owner, "password">>
-  //   login(email: string, password: string): Promise<Omit<SuperAdmin, "password">>
+export interface AuthRepository {
+  register(user: Partial<User>): Promise<Partial<User>>
+  login(email: string, password: string): Promise<Partial<User>>
 }

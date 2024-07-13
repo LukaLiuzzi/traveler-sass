@@ -1,5 +1,5 @@
-export interface BaseUser {
-  id: string
+export interface User {
+  _id: string
   email: string
   password: string
   name: string
@@ -10,23 +10,50 @@ export interface BaseUser {
   access_token: string
   refresh_token: string
   status: "active" | "inactive" | "deleted"
+  role:
+    | "owner"
+    | "sales"
+    | "support"
+    | "finance"
+    | "admin"
+    | "client"
+    | "super_admin"
+  tenant_id: string
+  proccess_status:
+    | "pending"
+    | "approved"
+    | "rejected"
+    | "cancelled"
+    | "reviewing"
+  plan_id: string
+  address: string
+  phone: string
+  marital_status:
+    | "single"
+    | "married"
+    | "divorced"
+    | "widowed"
+    | "separated"
+    | "unmarried"
+  children: number
+  occupation: string
 }
 
-export interface Owner extends BaseUser {
+export interface Owner extends User {
   role: "owner"
   tenant_id: string
 }
 
-export interface Employee extends BaseUser {
+export interface Employee extends User {
   role: "sales" | "support" | "finance" | "admin"
   tenant_id: string
 }
 
-export interface SuperAdmin extends BaseUser {
+export interface SuperAdmin extends User {
   role: "super_admin"
 }
 
-export interface Client extends BaseUser {
+export interface Client extends User {
   role: "client"
   tenant_id: string
   proccess_status:
@@ -82,7 +109,7 @@ export interface UpdateUserDTO {
     | "reviewing"
   plan_id?: string
 }
-export interface UserRepository<T extends BaseUser> {
+export interface UserRepository<T extends User> {
   findById(id: string): Promise<Omit<T, "password"> | null>
   findByEmail(email: string): Promise<Omit<T, "password"> | null>
 }

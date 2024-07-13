@@ -1,5 +1,8 @@
-import express, { Application, Request, Response } from "express"
+import express, { Application } from "express"
 import cors from "cors"
+import { AuthRoutes } from "@routes/authRoutes"
+import { connectToMongoDB } from "@config/mongo"
+
 class Server {
   public app: Application
   private port: number
@@ -18,12 +21,11 @@ class Server {
   }
 
   private configureRoutes(): void {
-    this.app.get("/", (req: Request, res: Response) => {
-      res.send("Hello, world!")
-    })
+    this.app.use("/api/v1/auth", AuthRoutes.init())
   }
 
-  public start(): void {
+  public async start(): Promise<void> {
+    await connectToMongoDB()
     this.app.listen(this.port, () => {
       console.log(`Server running on port ${this.port}`)
     })
