@@ -9,7 +9,7 @@ class AuthService {
     this.userRepository = userRepository
   }
 
-  async createUser(user: Partial<User>): Promise<Partial<User>> {
+  async register(user: Partial<User>): Promise<Partial<User>> {
     return this.userRepository.register(user)
   }
 

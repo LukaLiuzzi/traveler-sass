@@ -1,3 +1,4 @@
+import { User } from "@interfaces/user"
 import dotenv from "dotenv"
 dotenv.config()
 
@@ -9,3 +10,13 @@ export const API_URL =
   process.env.API_URL || `http://localhost:${PORT}/api/v${API_VERSION}`
 export const MONGO_URI = process.env.MONGO_URI || ""
 export const JWT_SECRET = process.env.JWT_SECRET || ""
+
+export const RolesWeight: { [key in User["role"]]: number } = {
+  super_admin: 10,
+  owner: 8,
+  admin: 7,
+  finance: 6,
+  sales: 6,
+  support: 6,
+  client: 1,
+}

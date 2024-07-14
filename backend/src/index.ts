@@ -2,6 +2,7 @@ import express, { Application } from "express"
 import cors from "cors"
 import { AuthRoutes } from "@routes/authRoutes"
 import { connectToMongoDB } from "@config/mongo"
+import { getUserData } from "middlewares/getUserData"
 
 class Server {
   public app: Application
@@ -18,6 +19,7 @@ class Server {
     this.app.use(express.json())
     this.app.use(express.urlencoded({ extended: true }))
     this.app.use(cors())
+    this.app.use(getUserData)
   }
 
   private configureRoutes(): void {

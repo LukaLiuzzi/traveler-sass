@@ -15,13 +15,14 @@ class MongoAuthRepository implements AuthRepository {
 
     const hashedPassword = await hashPassword(user.password!)
 
-    const newUser = await UserModel.create({
+    const newUser: User = await UserModel.create({
       ...user,
+      role: "client",
       password: hashedPassword,
     })
 
     const userWithoutPassword = {
-      ...newUser.toJSON(),
+      ...(newUser.toJSON() as object),
       password: undefined,
     }
 
