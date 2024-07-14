@@ -14,6 +14,8 @@ export const getUserData = async (
     const user = await UserModel.findById(decoded._id)
     if (user) {
       req.user = user
+    } else {
+      req.user = null
     }
   }
 
