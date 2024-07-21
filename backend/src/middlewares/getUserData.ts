@@ -21,40 +21,34 @@ export const getUserData = async (
     return res.status(401).json({ error: "Unauthorized" })
   }
 
-  if (decoded.role === "tenant") {
-    const tenant = await TenantModel.findOne({
-      email: decoded.email,
-      tenantId: decoded.tenantId,
-    }).exec()
-    if (!tenant) {
-      return res.status(404).json({ error: "Tenant not found" })
-    }
-    req.user = tenant
-    req.tenantId = tenant.tenantId
-    next()
-  } else if (decoded.role === "client") {
-    const client = await ClientModel.findOne({
-      email: decoded.email,
-      tenantId: decoded.tenantId,
-    }).exec()
-    if (!client) {
-      return res.status(404).json({ error: "Client not found" })
-    }
-    req.user = client
-    req.tenantId = client.tenantId
-    next()
-  } else {
-    const employee = await EmployeeModel.findOne({
-      email: decoded.email,
-      tenantId: decoded.tenantId,
-    }).exec()
-    if (!employee) {
-      return res.status(404).json({ error: "Employee not found" })
-    }
-    req.user = employee
-    req.tenantId = employee.tenantId
-    next()
-  }
+  try {
+    let user
 
-  return res.status(401).json({ error: "Unauthorized" })
+    if (decoded.role === "tenant") {
+      user = await TenantModel.findOne({
+        email: decoded.email,
+        tenantId: decoded.tenantId,
+      }).exec()
+    } else if (decoded.role === "client") {
+      user = await ClientModel.findOne({
+        email: decoded.email,
+        tenantId: decoded.tenantId,
+      }).exec()
+    } else {
+      user = await EmployeeModel.findOne({
+        email: decoded.email,
+        tenantId: decoded.tenantId,
+      }).exec()
+    }
+
+    if (!user) {
+      return res.status(404).json({ error: `User not found` })
+    }
+
+    req.user = user
+    req.tenantId = user.tenantId
+    next()
+  } catch (error) {
+    return res.status(500).json({ error: "Internal Server Error" })
+  }
 }
