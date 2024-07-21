@@ -1,80 +1,130 @@
-import UserModel from "@models/UserModel"
+import TenantModel from "@models/TenantModel"
+import EmployeeModel from "@models/EmployeeModel"
 import { AuthRepository } from "@interfaces/auth"
-import { User } from "@interfaces/user"
+import { Employee, Tenant } from "@interfaces/types"
 import jwt from "jsonwebtoken"
 import { JWT_SECRET } from "@config/constants"
 import { hashPassword, comparePassword } from "@helpers/hashPassword"
 import { ErrorHandle } from "@helpers/Error"
+import { Types } from "mongoose"
+import { generateAccessToken } from "@helpers/generateJwt"
 
 class MongoAuthRepository implements AuthRepository {
-  async register(user: Partial<User>): Promise<Partial<User>> {
-    const userExists = await UserModel.findOne({ email: user.email })
+  async createTenant(user: Partial<Tenant>): Promise<Partial<Tenant>> {
+    const userExists = await TenantModel.findOne({ email: user.email }).exec()
+
     if (userExists) {
       throw ErrorHandle.conflict("User already exists")
     }
 
     const hashedPassword = await hashPassword(user.password!)
 
-    const newUser: User = await UserModel.create({
+    const newUser = (await TenantModel.create({
       ...user,
-      role: "client",
+      role: "tenant",
       password: hashedPassword,
-    })
+    })) as unknown as Tenant
 
     const userWithoutPassword = {
-      ...(newUser.toJSON() as object),
+      ...(newUser.toJSON() as Omit<Tenant, "password">),
       password: undefined,
     }
 
     return userWithoutPassword
   }
 
-  async login(email: string, password: string): Promise<Partial<User>> {
-    const user = await UserModel.findOne({
-      email,
-    })
+  async createEmployee(
+    user: Partial<Employee>,
+    tenantId: string
+  ): Promise<Partial<Employee>> {
+    const userExists = await EmployeeModel.findOne({
+      email: user.email,
+      tenantId,
+    }).exec()
 
-    if (!user) {
-      throw ErrorHandle.badRequest("Invalid credentials")
+    if (userExists) {
+      throw ErrorHandle.conflict("User already exists")
     }
 
-    const isPasswordCorrect = await comparePassword(password, user.password)
+    const hashedPassword = await hashPassword(user.password!)
 
-    if (!isPasswordCorrect) {
-      throw ErrorHandle.badRequest("Invalid credentials")
-    }
-
-    const token = jwt.sign(
-      {
-        email: user.email,
-        id: user._id,
-      },
-      JWT_SECRET,
-      {
-        expiresIn: "1h",
-      }
-    )
-
-    const userWithToken = await UserModel.findByIdAndUpdate(
-      user._id,
-      {
-        access_token: token,
-      },
-      {
-        new: true,
-      }
-    )
-
-    if (!userWithToken) {
-      throw ErrorHandle.internal("Error generating token")
-    }
+    const newUser = (await EmployeeModel.create({
+      ...user,
+      password: hashedPassword,
+      tenantId,
+    })) as unknown as Employee
 
     const userWithoutPassword = {
-      ...userWithToken.toJSON(),
+      ...(newUser.toJSON() as Omit<Employee, "password">),
       password: undefined,
     }
 
     return userWithoutPassword
+  }
+
+  async login(
+    email: string,
+    password: string,
+    tenantId: string
+  ): Promise<Partial<Tenant> | Partial<Employee>> {
+    const employee = await EmployeeModel.findOne({ email, tenantId }).exec()
+
+    if (employee) {
+      const isPasswordCorrect = await comparePassword(
+        password,
+        employee.password
+      )
+
+      if (!isPasswordCorrect) {
+        throw ErrorHandle.unauthorized("Invalid credentials")
+      }
+
+      const token = generateAccessToken({
+        email: employee.email,
+        role: employee.role,
+        tenantId: employee.tenantId,
+      })
+
+      await EmployeeModel.updateOne(
+        { _id: employee._id },
+        { accessToken: token }
+      ).exec()
+
+      return {
+        ...(employee.toJSON() as Omit<Employee, "password">),
+        password: undefined,
+        accessToken: token,
+      }
+    }
+
+    const tenant = await TenantModel.findOne({ email, tenantId }).exec()
+
+    if (!tenant) {
+      throw ErrorHandle.unauthorized("Invalid credentials")
+    }
+
+    const isPasswordCorrect = await comparePassword(password, tenant.password)
+
+    if (!isPasswordCorrect) {
+      throw ErrorHandle.unauthorized("Invalid credentials")
+    }
+
+    const token = generateAccessToken({
+      email: tenant.email,
+      role: tenant.role,
+      tenantId: tenant.tenantId,
+    })
+
+    await TenantModel.updateOne(
+      { _id: tenant._id },
+      { accessToken: token }
+    ).exec()
+
+    return {
+      ...(tenant.toJSON() as Omit<Tenant, "password">),
+      password: undefined,
+      accessToken: token,
+    }
   }
 }
 

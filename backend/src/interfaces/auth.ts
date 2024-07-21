@@ -1,6 +1,14 @@
-import { User } from "./user"
+import { Employee, Tenant } from "./types"
 
 export interface AuthRepository {
-  register(user: Partial<User>): Promise<Partial<User>>
-  login(email: string, password: string): Promise<Partial<User>>
+  createTenant(user: Partial<Tenant>): Promise<Partial<Tenant>>
+  createEmployee(
+    user: Partial<Employee>,
+    tenantId: string
+  ): Promise<Partial<Employee>>
+  login(
+    email: string,
+    password: string,
+    tenantId: string
+  ): Promise<Partial<Tenant> | Partial<Employee>>
 }

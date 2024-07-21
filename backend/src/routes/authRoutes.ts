@@ -14,15 +14,10 @@ class AuthRoutes {
     router.post(
       "/register/employee",
       validateSchema(EmployeeRegisterSchema),
-      checkRole(["super_admin", "owner"]),
-      AuthController.register
+      checkRole(["superAdmin"]),
+      AuthController.createEmployee
     )
-    router.post(
-      "/register",
-      validateSchema(ClientRegisterSchema),
-      AuthController.register
-    )
-    router.post("/login", AuthController.loginUser)
+    router.post("/login", AuthController.login)
     return router
   }
 }
