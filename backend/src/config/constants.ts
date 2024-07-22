@@ -1,4 +1,4 @@
-import { User } from "@interfaces/types"
+// import { User } from "@interfaces/types"
 import dotenv from "dotenv"
 dotenv.config()
 

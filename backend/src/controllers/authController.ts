@@ -10,6 +10,8 @@ class AuthController {
     } catch (error) {
       if (error instanceof ErrorHandle) {
         res.status(error.statusCode).json({ error: error.message })
+      } else if ((error as any).name === "ValidationError") {
+        res.status(400).json({ error: (error as any).errors })
       } else {
         res.status(500).json({ error: "Internal Server Error" })
       }
@@ -35,12 +37,25 @@ class AuthController {
 
   static async login(req: MyRequest, res: MyResponse): Promise<void> {
     try {
-      const { tenantId } = req
-      const { email, password } = req.body
+      const { email, password, tenantId } = req.body
       if (!tenantId) {
         throw ErrorHandle.badRequest("TenantId is required")
       }
       const user = await authService.login(email, password, tenantId)
+      res.status(200).json(user)
+    } catch (error) {
+      if (error instanceof ErrorHandle) {
+        res.status(error.statusCode).json({ error: error.message })
+      } else {
+        res.status(500).json({ error: "Internal Server Error" })
+      }
+    }
+  }
+
+  static async loginSuperAdmin(req: MyRequest, res: MyResponse): Promise<void> {
+    try {
+      const { email, password } = req.body
+      const user = await authService.loginSuperAdmin(email, password)
       res.status(200).json(user)
     } catch (error) {
       if (error instanceof ErrorHandle) {

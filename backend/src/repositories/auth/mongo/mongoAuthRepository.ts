@@ -1,13 +1,11 @@
 import TenantModel from "@models/TenantModel"
 import EmployeeModel from "@models/EmployeeModel"
 import { AuthRepository } from "@interfaces/auth"
-import { Employee, Tenant } from "@interfaces/types"
-import jwt from "jsonwebtoken"
-import { JWT_SECRET } from "@config/constants"
+import { Employee, SuperAdmin, Tenant } from "@interfaces/types"
 import { hashPassword, comparePassword } from "@helpers/hashPassword"
 import { ErrorHandle } from "@helpers/Error"
-import { Types } from "mongoose"
 import { generateAccessToken } from "@helpers/generateJwt"
+import SuperAdminModel from "@models/SuperAdmin"
 
 class MongoAuthRepository implements AuthRepository {
   async createTenant(user: Partial<Tenant>): Promise<Partial<Tenant>> {
@@ -125,6 +123,46 @@ class MongoAuthRepository implements AuthRepository {
       password: undefined,
       accessToken: token,
     }
+  }
+
+  async loginSuperAdmin(
+    email: string,
+    password: string
+  ): Promise<Partial<SuperAdmin>> {
+    const superAdmin = (await SuperAdminModel.findOne({
+      email,
+    }).exec()) as unknown as SuperAdmin | null
+
+    if (!superAdmin) {
+      throw ErrorHandle.unauthorized("Invalid credentials")
+    }
+
+    const isPasswordCorrect = await comparePassword(
+      password,
+      superAdmin.password
+    )
+
+    if (!isPasswordCorrect) {
+      throw ErrorHandle.unauthorized("Invalid credentials")
+    }
+
+    const token = generateAccessToken({
+      email: superAdmin.email,
+      role: superAdmin.role,
+    })
+
+    await SuperAdminModel.updateOne(
+      { _id: superAdmin._id },
+      { accessToken: token }
+    ).exec()
+
+    const superAdminWithoutPassword = {
+      ...(superAdmin.toJSON() as Omit<SuperAdmin, "password">),
+      password: undefined,
+      accessToken: token,
+    }
+
+    return superAdminWithoutPassword
   }
 }
 

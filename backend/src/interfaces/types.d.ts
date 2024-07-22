@@ -35,3 +35,13 @@ export interface Client extends User {
   children: number
   occupation: string
 }
+
+export interface SuperAdmin {
+  _id?: Types.ObjectId
+  toJSON(): Omit<SuperAdmin, "password">
+  email: string
+  password: string
+  accessToken: string
+  refreshToken: string
+  role: "superAdmin"
+}

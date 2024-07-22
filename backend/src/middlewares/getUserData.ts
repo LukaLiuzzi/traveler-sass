@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken"
 import TenantModel from "@models/TenantModel"
 import EmployeeModel from "@models/EmployeeModel"
 import ClientModel from "@models/ClientModel"
+import SuperAdminModel from "@models/SuperAdmin"
 
 export const getUserData = async (
   req: MyRequest,
@@ -24,7 +25,15 @@ export const getUserData = async (
   try {
     let user
 
-    if (decoded.role === "tenant") {
+    if (decoded.role === "superAdmin") {
+      const superAdmin = await SuperAdminModel.findOne({
+        email: decoded.email,
+      }).exec()
+      req.isSuperAdmin = true
+      req.user = superAdmin
+      next()
+      return
+    } else if (decoded.role === "tenant") {
       user = await TenantModel.findOne({
         email: decoded.email,
         tenantId: decoded.tenantId,
@@ -47,6 +56,7 @@ export const getUserData = async (
 
     req.user = user
     req.tenantId = user.tenantId
+    req.isSuperAdmin = false
     next()
   } catch (error) {
     return res.status(500).json({ error: "Internal Server Error" })

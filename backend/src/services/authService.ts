@@ -1,7 +1,6 @@
 import { AuthFactory } from "@repositories/auth/authFactory"
 import { AuthRepository } from "@interfaces/auth"
-import { Employee, Tenant } from "@interfaces/types"
-import { Types } from "mongoose"
+import { Employee, SuperAdmin, Tenant } from "@interfaces/types"
 
 class AuthService implements AuthRepository {
   private authRepository: AuthRepository
@@ -27,6 +26,13 @@ class AuthService implements AuthRepository {
     tenantId: string
   ): Promise<Partial<Tenant> | Partial<Employee>> {
     return this.authRepository.login(email, password, tenantId)
+  }
+
+  loginSuperAdmin(
+    email: string,
+    password: string
+  ): Promise<Partial<SuperAdmin>> {
+    return this.authRepository.loginSuperAdmin(email, password)
   }
 }
 
