@@ -16,6 +16,7 @@ const TenantSchema = new Schema({
   tenantId: {
     type: String,
     required: true,
+    unique: true,
   },
   phone: { type: String },
 })
