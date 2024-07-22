@@ -17,11 +17,11 @@ class MongoAuthRepository implements AuthRepository {
 
     const hashedPassword = await hashPassword(user.password!)
 
-    const newUser = (await TenantModel.create({
+    const newUser = await TenantModel.create({
       ...user,
       role: "tenant",
       password: hashedPassword,
-    })) as unknown as Tenant
+    })
 
     const userWithoutPassword = {
       ...(newUser.toJSON() as Omit<Tenant, "password">),
@@ -46,11 +46,11 @@ class MongoAuthRepository implements AuthRepository {
 
     const hashedPassword = await hashPassword(user.password!)
 
-    const newUser = (await EmployeeModel.create({
+    const newUser = await EmployeeModel.create({
       ...user,
       password: hashedPassword,
       tenantId,
-    })) as unknown as Employee
+    })
 
     const userWithoutPassword = {
       ...(newUser.toJSON() as Omit<Employee, "password">),
@@ -129,9 +129,9 @@ class MongoAuthRepository implements AuthRepository {
     email: string,
     password: string
   ): Promise<Partial<SuperAdmin>> {
-    const superAdmin = (await SuperAdminModel.findOne({
+    const superAdmin = await SuperAdminModel.findOne({
       email,
-    }).exec()) as unknown as SuperAdmin | null
+    }).exec()
 
     if (!superAdmin) {
       throw ErrorHandle.unauthorized("Invalid credentials")
