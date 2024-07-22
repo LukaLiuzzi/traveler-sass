@@ -1,7 +1,8 @@
 import { Employee } from "@interfaces/types"
-import { Schema, model } from "mongoose"
+import { Schema, model, Document, PaginateModel } from "mongoose"
+import mongoosePaginate from "mongoose-paginate-v2"
 
-const EmployeeSchema = new Schema<Employee>({
+const EmployeeSchema = new Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   name: { type: String },
@@ -20,4 +21,11 @@ const EmployeeSchema = new Schema<Employee>({
   phone: { type: String },
 })
 
-export default model<Employee>("Employee", EmployeeSchema)
+EmployeeSchema.plugin(mongoosePaginate)
+
+interface EmployeeDocument extends Document, Employee {}
+
+export default model<EmployeeDocument, PaginateModel<EmployeeDocument>>(
+  "Employee",
+  EmployeeSchema
+)

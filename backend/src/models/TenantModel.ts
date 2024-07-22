@@ -1,7 +1,7 @@
 import { Tenant } from "@interfaces/types"
-import { Schema, model } from "mongoose"
+import { Schema, model, Document } from "mongoose"
 
-const TenantSchema = new Schema<Tenant>({
+const TenantSchema = new Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   name: { type: String },
@@ -20,4 +20,6 @@ const TenantSchema = new Schema<Tenant>({
   phone: { type: String },
 })
 
-export default model<Tenant>("Tenant", TenantSchema)
+interface TenantDocument extends Document, Tenant {}
+
+export default model<TenantDocument>("Tenant", TenantSchema)

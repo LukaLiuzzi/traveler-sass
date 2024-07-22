@@ -1,7 +1,7 @@
 import { SuperAdmin } from "@interfaces/types"
-import { Schema, model } from "mongoose"
+import { Schema, model, Document } from "mongoose"
 
-const UserSchema = new Schema<SuperAdmin>({
+const UserSchema = new Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   accessToken: { type: String },
@@ -9,4 +9,6 @@ const UserSchema = new Schema<SuperAdmin>({
   role: { type: String, default: "superAdmin" },
 })
 
-export default model<SuperAdmin>("SuperAdmin", UserSchema)
+interface SuperAdminDocument extends SuperAdmin, Document {}
+
+export default model<SuperAdminDocument>("SuperAdmin", UserSchema)

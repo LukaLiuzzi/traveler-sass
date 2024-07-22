@@ -1,7 +1,7 @@
 import { Client } from "@interfaces/types"
-import { Schema, model } from "mongoose"
+import { Schema, model, Document } from "mongoose"
 
-const ClientSchema = new Schema<Client>({
+const ClientSchema = new Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   name: { type: String },
@@ -26,4 +26,6 @@ const ClientSchema = new Schema<Client>({
   occupation: { type: String },
 })
 
-export default model<Client>("Client", ClientSchema)
+interface ClientDocument extends Document, Client {}
+
+export default model<ClientDocument>("Client", ClientSchema)

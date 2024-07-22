@@ -1,7 +1,6 @@
 import { Types } from "mongoose"
 
 interface User {
-  toJSON(): Omit<User, "password">
   email: string
   password: string
   name: string
@@ -37,8 +36,6 @@ export interface Client extends User {
 }
 
 export interface SuperAdmin {
-  _id?: Types.ObjectId
-  toJSON(): Omit<SuperAdmin, "password">
   email: string
   password: string
   accessToken: string
