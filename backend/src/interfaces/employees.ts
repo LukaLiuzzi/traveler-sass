@@ -1,13 +1,20 @@
 import { Employee } from "./types"
 
+export interface GetEmployeesParams {
+  page?: number
+  limit?: number
+  tenantId: string
+  search?: string
+  role?: string
+}
 export interface EmployeesRepository {
-  getEmployees: (
-    page: number,
-    limit: number,
-    search: string,
-    role: string,
-    tenantId: string
-  ) => Promise<Employee[]>
+  getEmployees: ({
+    page,
+    limit,
+    tenantId,
+    search,
+    role,
+  }: GetEmployeesParams) => Promise<Employee[]>
   getEmployeeById: (id: string, tenantId: string) => Promise<Employee>
   updateEmployee: (
     employee: Employee,

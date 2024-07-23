@@ -1,20 +1,16 @@
-import TenantModel from "@models/TenantModel"
 import EmployeeModel from "@models/EmployeeModel"
-import { EmployeesRepository } from "@interfaces/employees"
-import { Employee, SuperAdmin, Tenant } from "@interfaces/types"
-import { hashPassword, comparePassword } from "@helpers/hashPassword"
+import { EmployeesRepository, GetEmployeesParams } from "@interfaces/employees"
+import { Employee } from "@interfaces/types"
 import { ErrorHandle } from "@helpers/Error"
-import { generateAccessToken } from "@helpers/generateJwt"
-import SuperAdminModel from "@models/SuperAdmin"
 
 class MongoEmployeesRepository implements EmployeesRepository {
-  async getEmployees(
-    page: number = 1,
-    limit: number = 50,
-    tenantId: string,
-    search?: string,
-    role?: string
-  ): Promise<Employee[]> {
+  async getEmployees({
+    page = 1,
+    limit = 50,
+    tenantId,
+    search,
+    role,
+  }: GetEmployeesParams): Promise<Employee[]> {
     const query = {
       tenantId,
       ...(search && { $text: { $search: search } }),
@@ -49,7 +45,10 @@ class MongoEmployeesRepository implements EmployeesRepository {
   ): Promise<Employee> {
     const updatedEmployee = await EmployeeModel.findOneAndUpdate(
       { _id: id, tenantId },
-      employee,
+      {
+        ...employee,
+        updatedAt: new Date(),
+      },
       { new: true }
     )
       .select("-password")

@@ -2,6 +2,7 @@ import express, { Application } from "express"
 import cors from "cors"
 import { AuthRoutes } from "@routes/authRoutes"
 import { connectToMongoDB } from "@config/mongo"
+import { EmployeesRoutes } from "@routes/employeesRoutes"
 
 class Server {
   public app: Application
@@ -22,6 +23,7 @@ class Server {
 
   private configureRoutes(): void {
     this.app.use("/api/v1/auth", AuthRoutes.init())
+    this.app.use("/api/v1/employees", EmployeesRoutes.init())
   }
 
   public async start(): Promise<void> {
