@@ -12,7 +12,11 @@ const EmployeeSchema = new Schema({
   updatedAt: { type: Date, default: Date.now },
   accessToken: { type: String },
   refreshToken: { type: String },
-  status: { type: String, default: "active" },
+  status: {
+    type: String,
+    default: "active",
+    enum: ["active", "inactive", "deleted"],
+  },
   role: { type: String },
   tenantId: {
     type: String,

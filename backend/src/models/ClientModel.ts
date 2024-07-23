@@ -11,7 +11,11 @@ const ClientSchema = new Schema({
   updatedAt: { type: Date, default: Date.now },
   accessToken: { type: String },
   refreshToken: { type: String },
-  status: { type: String },
+  status: {
+    type: String,
+    default: "active",
+    enum: ["active", "inactive", "deleted"],
+  },
   role: { type: String, default: "client" },
   tenantId: {
     type: String,
