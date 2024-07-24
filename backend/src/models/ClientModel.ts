@@ -1,11 +1,11 @@
 import { Client } from "@interfaces/types"
-import { Schema, model, Document } from "mongoose"
+import { Schema, model, Document, Types } from "mongoose"
 
 const ClientSchema = new Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  name: { type: String },
-  lastName: { type: String },
+  name: { type: String, required: true },
+  lastName: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
   deletedAt: { type: Date, default: null },
   updatedAt: { type: Date, default: Date.now },
@@ -22,7 +22,7 @@ const ClientSchema = new Schema({
     ref: "Tenant",
   },
   proccessStatus: { type: String },
-  planId: { type: String },
+  planId: { type: Types.ObjectId, ref: "Plan" },
   address: { type: String },
   phone: { type: String },
   maritalStatus: { type: String },
