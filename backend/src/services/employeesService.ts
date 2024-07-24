@@ -12,15 +12,13 @@ class EmployeesService implements EmployeesRepository {
   getEmployees({
     page,
     limit,
-    search,
-    role,
+    query,
     tenantId,
   }: GetEmployeesParams): Promise<Employee[]> {
     return this.employeeesRepository.getEmployees({
       page,
       limit,
-      search,
-      role,
+      query,
       tenantId,
     })
   }

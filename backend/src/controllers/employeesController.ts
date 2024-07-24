@@ -1,22 +1,27 @@
 import { MyRequest, MyResponse } from "@interfaces/http"
 import { ErrorHandle } from "@helpers/Error"
 import { employeesService } from "@services/employeesService"
+import { GetEmployeesQuery } from "@interfaces/employees"
 
 class EmployeesController {
   static async getEmployees(req: MyRequest, res: MyResponse): Promise<void> {
     try {
-      const { page, limit, search, role } = req.query
+      const { page, limit, name, email, role } = req.query
       const { tenantId } = req
-
       if (!tenantId) {
         throw ErrorHandle.badRequest("TenantId is required")
+      }
+
+      const query: GetEmployeesQuery = {
+        ...(name && { name: name as string }),
+        ...(email && { email: email as string }),
+        ...(role && { role: role as string }),
       }
 
       const employees = await employeesService.getEmployees({
         page: page ? parseInt(page as string) : 1,
         limit: limit ? parseInt(limit as string) : 50,
-        search: search as string,
-        role: role as string,
+        query,
         tenantId,
       })
       res.status(200).json(employees)
@@ -24,6 +29,7 @@ class EmployeesController {
       if (error instanceof ErrorHandle) {
         res.status(error.statusCode).json({ error: error.message })
       } else {
+        console.log(error)
         res.status(500).json({ error: "Internal Server Error" })
       }
     }

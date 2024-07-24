@@ -8,20 +8,21 @@ class MongoEmployeesRepository implements EmployeesRepository {
     page = 1,
     limit = 50,
     tenantId,
-    search,
-    role,
+    query,
   }: GetEmployeesParams): Promise<Employee[]> {
-    const query = {
-      tenantId,
-      ...(search && { $text: { $search: search } }),
-      ...(role && { role }),
-    }
-
-    const employees = await EmployeeModel.paginate(query, {
-      page,
-      limit,
-      select: "-password",
-    })
+    console.log(query)
+    const employees = await EmployeeModel.paginate(
+      {
+        ...query,
+        tenantId,
+        status: { $ne: "deleted" },
+      },
+      {
+        page,
+        limit,
+        select: "-password",
+      }
+    )
 
     return employees.docs as Employee[]
   }
