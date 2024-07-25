@@ -1,6 +1,6 @@
 import { AuthFactory } from "@repositories/auth/authFactory"
 import { AuthRepository } from "@interfaces/auth"
-import { Employee, SuperAdmin, Tenant } from "@interfaces/types"
+import { Client, Employee, SuperAdmin, Tenant } from "@interfaces/types"
 
 class AuthService implements AuthRepository {
   private authRepository: AuthRepository
@@ -18,6 +18,13 @@ class AuthService implements AuthRepository {
     tenantId: string
   ): Promise<Partial<Employee>> {
     return this.authRepository.createEmployee(user, tenantId)
+  }
+
+  createClient(
+    client: Partial<Client>,
+    tenantId: string
+  ): Promise<Partial<Client>> {
+    return this.authRepository.createClient(client, tenantId)
   }
 
   login(
