@@ -1,5 +1,9 @@
 import EmployeeModel from "@models/EmployeeModel"
-import { EmployeesRepository, GetEmployeesParams } from "@interfaces/employees"
+import {
+  EmployeesRepository,
+  GetEmployeesParams,
+  GetEmployeesResponse,
+} from "@interfaces/employees"
 import { Employee } from "@interfaces/types"
 import { ErrorHandle } from "@helpers/Error"
 
@@ -9,8 +13,7 @@ class MongoEmployeesRepository implements EmployeesRepository {
     limit = 50,
     tenantId,
     query,
-  }: GetEmployeesParams): Promise<Employee[]> {
-    console.log(query)
+  }: GetEmployeesParams): Promise<GetEmployeesResponse> {
     const employees = await EmployeeModel.paginate(
       {
         ...query,
@@ -24,7 +27,7 @@ class MongoEmployeesRepository implements EmployeesRepository {
       }
     )
 
-    return employees.docs as Employee[]
+    return employees as unknown as GetEmployeesResponse
   }
 
   async getEmployeeById(id: string, tenantId: string): Promise<Employee> {

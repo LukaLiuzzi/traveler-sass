@@ -1,5 +1,9 @@
 import { EmployeesFactory } from "@repositories/employees/employeesFactory"
-import { EmployeesRepository, GetEmployeesParams } from "@interfaces/employees"
+import {
+  EmployeesRepository,
+  GetEmployeesParams,
+  GetEmployeesResponse,
+} from "@interfaces/employees"
 import { Employee } from "@interfaces/types"
 
 class EmployeesService implements EmployeesRepository {
@@ -14,7 +18,7 @@ class EmployeesService implements EmployeesRepository {
     limit,
     query,
     tenantId,
-  }: GetEmployeesParams): Promise<Employee[]> {
+  }: GetEmployeesParams): Promise<GetEmployeesResponse> {
     return this.employeeesRepository.getEmployees({
       page,
       limit,

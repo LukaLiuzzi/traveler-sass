@@ -11,13 +11,26 @@ export interface GetEmployeesParams {
   tenantId: string
   query?: GetEmployeesQuery
 }
+
+export interface GetEmployeesResponse {
+  docs: Employee[]
+  totalDocs: number
+  limit: number
+  totalPages: number
+  page: number
+  pagingCounter: number
+  hasPrevPage: boolean
+  hasNextPage: boolean
+  prevPage: number | null
+  nextPage: number | null
+}
 export interface EmployeesRepository {
   getEmployees: ({
     page,
     limit,
     tenantId,
     query,
-  }: GetEmployeesParams) => Promise<Employee[]>
+  }: GetEmployeesParams) => Promise<GetEmployeesResponse>
   getEmployeeById: (id: string, tenantId: string) => Promise<Employee>
   updateEmployee: (
     employee: Employee,
