@@ -35,6 +35,24 @@ class AuthController {
     }
   }
 
+  static async createClient(req: MyRequest, res: MyResponse): Promise<void> {
+    try {
+      const { tenantId } = req
+      if (!tenantId) {
+        throw ErrorHandle.badRequest("TenantId is required")
+      }
+
+      const user = await authService.createClient(req.body, tenantId)
+      res.status(200).json(user)
+    } catch (error) {
+      if (error instanceof ErrorHandle) {
+        res.status(error.statusCode).json({ error: error.message })
+      } else {
+        res.status(500).json({ error: "Internal Server Error" })
+      }
+    }
+  }
+
   static async login(req: MyRequest, res: MyResponse): Promise<void> {
     try {
       const { email, password, tenantId } = req.body

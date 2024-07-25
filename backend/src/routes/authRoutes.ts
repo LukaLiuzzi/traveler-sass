@@ -8,6 +8,7 @@ import {
 } from "validationSchemas/authSchema"
 import { checkRole } from "middlewares/checkRole"
 import { getUserData } from "middlewares/getUserData"
+import { ClientRegisterSchema } from "validationSchemas/clientsSchemas"
 
 const router = Router()
 
@@ -26,6 +27,13 @@ class AuthRoutes {
       getUserData,
       checkRole(["superAdmin", "tenant"]),
       AuthController.createEmployee
+    )
+    router.post(
+      "/register/client",
+      validateSchema(ClientRegisterSchema),
+      getUserData,
+      checkRole(["superAdmin", "tenant", "admin", "sales"]),
+      AuthController.createClient
     )
     router.post("/login", validateSchema(LoginSchema), AuthController.login)
     router.post(
