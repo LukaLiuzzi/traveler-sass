@@ -1,7 +1,8 @@
 import TenantModel from "@models/TenantModel"
 import EmployeeModel from "@models/EmployeeModel"
+import ClientModel from "@models/ClientModel"
 import { AuthRepository } from "@interfaces/auth"
-import { Employee, SuperAdmin, Tenant } from "@interfaces/types"
+import { Client, Employee, SuperAdmin, Tenant } from "@interfaces/types"
 import { hashPassword, comparePassword } from "@helpers/hashPassword"
 import { ErrorHandle } from "@helpers/Error"
 import { generateAccessToken } from "@helpers/generateJwt"
@@ -58,6 +59,35 @@ class MongoAuthRepository implements AuthRepository {
     }
 
     return userWithoutPassword
+  }
+
+  async createClient(
+    client: Partial<Client>,
+    tenantId: string
+  ): Promise<Partial<Client>> {
+    const clientExists = await ClientModel.findOne({
+      email: client.email,
+      tenantId,
+    }).exec()
+
+    if (clientExists) {
+      throw ErrorHandle.conflict("Client already exists")
+    }
+
+    const hashedPassword = await hashPassword(client.password!)
+
+    const newClient = await ClientModel.create({
+      ...client,
+      password: hashedPassword,
+      tenantId,
+    })
+
+    const clientWithoutPassword = {
+      ...(newClient.toJSON() as Omit<Client, "password">),
+      password: undefined,
+    }
+
+    return clientWithoutPassword
   }
 
   async login(
