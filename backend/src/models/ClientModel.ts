@@ -1,5 +1,6 @@
 import { Client } from "@interfaces/types"
-import { Schema, model, Document, Types } from "mongoose"
+import { Schema, model, Document, Types, PaginateModel } from "mongoose"
+import mongoosePaginate from "mongoose-paginate-v2"
 
 const ClientSchema = new Schema({
   email: { type: String, required: true, unique: true },
@@ -21,7 +22,7 @@ const ClientSchema = new Schema({
     type: String,
     ref: "Tenant",
   },
-  proccessStatus: { type: String },
+  proccessStatus: { type: String, enum: ["pending", "approved", "rejected"] },
   planId: { type: Types.ObjectId, ref: "Plan" },
   address: { type: String },
   phone: { type: String },
@@ -30,6 +31,11 @@ const ClientSchema = new Schema({
   occupation: { type: String },
 })
 
+ClientSchema.plugin(mongoosePaginate)
+
 interface ClientDocument extends Document, Client {}
 
-export default model<ClientDocument>("Client", ClientSchema)
+export default model<ClientDocument, PaginateModel<ClientDocument>>(
+  "Client",
+  ClientSchema
+)
