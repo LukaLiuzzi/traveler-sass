@@ -7,10 +7,10 @@ import {
 import { Client } from "@interfaces/types"
 
 class ClientsService implements ClientsRepositoryType {
-  private employeeesRepository: ClientsRepositoryType
+  private clientsRepository: ClientsRepositoryType
 
-  constructor(employeeesRepository: ClientsRepositoryType) {
-    this.employeeesRepository = employeeesRepository
+  constructor(clientsRepository: ClientsRepositoryType) {
+    this.clientsRepository = clientsRepository
   }
 
   getClients({
@@ -19,7 +19,7 @@ class ClientsService implements ClientsRepositoryType {
     query,
     tenantId,
   }: GetClientsParams): Promise<GetClientsResponse> {
-    return this.employeeesRepository.getClients({
+    return this.clientsRepository.getClients({
       page,
       limit,
       query,
@@ -28,15 +28,15 @@ class ClientsService implements ClientsRepositoryType {
   }
 
   getClientById(id: string, tenantId: string): Promise<Client> {
-    return this.employeeesRepository.getClientById(id, tenantId)
+    return this.clientsRepository.getClientById(id, tenantId)
   }
 
   updateClient(client: Client, id: string, tenantId: string): Promise<Client> {
-    return this.employeeesRepository.updateClient(client, id, tenantId)
+    return this.clientsRepository.updateClient(client, id, tenantId)
   }
 
   deleteClient(id: string, tenantId: string): Promise<boolean> {
-    return this.employeeesRepository.deleteClient(id, tenantId)
+    return this.clientsRepository.deleteClient(id, tenantId)
   }
 }
 
