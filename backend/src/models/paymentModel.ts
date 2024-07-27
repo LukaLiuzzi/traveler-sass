@@ -1,5 +1,6 @@
 import { Payment } from "@interfaces/types"
-import { Schema, model, Document } from "mongoose"
+import { Schema, model, Document, PaginateModel } from "mongoose"
+import mongoosePaginate from "mongoose-paginate-v2"
 
 const PaymentSchema = new Schema({
   amount: {
@@ -29,7 +30,7 @@ const PaymentSchema = new Schema({
     type: Boolean,
     required: true,
   },
-  PaymentStatus: {
+  paymentStatus: {
     type: String,
     required: true,
     enum: ["pending", "paid", "canceled", "refunded", "partiallyPaid"],
@@ -44,6 +45,11 @@ const PaymentSchema = new Schema({
   },
 })
 
+PaymentSchema.plugin(mongoosePaginate)
+
 interface PaymentDocument extends Document, Payment {}
 
-export default model<PaymentDocument>("Client", PaymentSchema)
+export default model<PaymentDocument, PaginateModel<PaymentDocument>>(
+  "Payment",
+  PaymentSchema
+)

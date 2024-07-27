@@ -4,6 +4,7 @@ import { AuthRoutes } from "@routes/authRoutes"
 import { connectToMongoDB } from "@config/mongo"
 import { EmployeesRoutes } from "@routes/employeesRoutes"
 import { ClientsRoutes } from "@routes/clientsRoutes"
+import { PaymentsRoutes } from "@routes/paymentsRoutes"
 
 class Server {
   public app: Application
@@ -26,6 +27,7 @@ class Server {
     this.app.use("/api/v1/auth", AuthRoutes.init())
     this.app.use("/api/v1/employees", EmployeesRoutes.init())
     this.app.use("/api/v1/clients", ClientsRoutes.init())
+    this.app.use("/api/v1/payments", PaymentsRoutes.init())
   }
 
   public async start(): Promise<void> {
