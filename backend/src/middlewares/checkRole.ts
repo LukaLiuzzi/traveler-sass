@@ -2,7 +2,17 @@ import { MyRequest, MyResponse } from "@interfaces/http"
 import { NextFunction } from "express"
 
 export const checkRole =
-  (role: string[] = ["client"]) =>
+  (
+    role: (
+      | "superAdmin"
+      | "tenant"
+      | "admin"
+      | "support"
+      | "finance"
+      | "sales"
+      | "client"
+    )[]
+  ) =>
   (req: MyRequest, res: MyResponse, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({ message: "Unauthorized" })
