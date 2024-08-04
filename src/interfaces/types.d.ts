@@ -8,6 +8,7 @@ interface User {
   createdAt: Date
   deletedAt: Date
   updatedAt: Date
+  deletedAt: boolean
   accessToken: string
   refreshToken: string
   status: "active" | "inactive" | "deleted"
@@ -51,8 +52,31 @@ export interface Plan {
   status: "active" | "inactive" | "deleted"
   createdAt: Date
   updatedAt: Date
+  deletedAt: Date
 }
-export interface Document {}
+
+// {
+//   objectKey: 'destination_file_name.ext',
+//   uri: 'destination_file_name.ext',
+//   publicUrl: 'https://pub-xxxxxxxxxxxxxxxxxxxxxxxxx.r2.dev/destination_file_name.ext',
+//   etag: '',
+//   versionId: '',
+//   }
+export interface Document {
+  title: string
+  description?: string
+  name: string
+  uri: string
+  publicUrl: string
+  etag: string
+  versionId: string
+  tenantId: string
+  clientId: string
+  createdAt: Date
+  updatedAt: Date
+  deletedAt: Date
+  status: "active" | "inactive" | "deleted"
+}
 
 export interface Payment {
   amount: number
@@ -64,4 +88,19 @@ export interface Payment {
   PaymentStatus: "pending" | "paid" | "canceled" | "refunded" | "partiallyPaid"
   createdAt: Date
   updatedAt: Date
+  deletedAt: Date
+}
+
+export interface UserAccesses {
+  userId: string
+  tenantId: string
+  clientId: string
+  employeeId: string
+  createdAt: Date
+  ip: string
+  userAgent: string
+  location: string
+  device: string
+  browser: string
+  os: string
 }
