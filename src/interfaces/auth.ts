@@ -16,4 +16,5 @@ export interface AuthRepository {
     tenantId: string
   ): Promise<Partial<Tenant> | Partial<Employee>>
   loginSuperAdmin(email: string, password: string): Promise<Partial<SuperAdmin>>
+  refreshToken(refreshToken: string): Promise<string>
 }

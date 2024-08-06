@@ -60,6 +60,14 @@ class AuthController {
         throw ErrorHandle.badRequest("TenantId is required")
       }
       const user = await authService.login(email, password, tenantId)
+
+      res.cookie("accessToken", user.accessToken, {
+        httpOnly: true,
+      })
+      res.cookie("refreshToken", user.refreshToken, {
+        httpOnly: true,
+      })
+
       res.status(200).json(user)
     } catch (error) {
       if (error instanceof ErrorHandle) {
@@ -75,6 +83,24 @@ class AuthController {
       const { email, password } = req.body
       const user = await authService.loginSuperAdmin(email, password)
       res.status(200).json(user)
+    } catch (error) {
+      if (error instanceof ErrorHandle) {
+        res.status(error.statusCode).json({ error: error.message })
+      } else {
+        res.status(500).json({ error: "Internal Server Error" })
+      }
+    }
+  }
+
+  static async refreshToken(req: MyRequest, res: MyResponse): Promise<void> {
+    try {
+      const refreshToken = req.cookies.refreshToken
+      const accessToken = await authService.refreshToken(refreshToken)
+      res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+      })
+
+      res.status(200).json({ accessToken })
     } catch (error) {
       if (error instanceof ErrorHandle) {
         res.status(error.statusCode).json({ error: error.message })

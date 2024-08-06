@@ -41,6 +41,10 @@ class AuthService implements AuthRepository {
   ): Promise<Partial<SuperAdmin>> {
     return this.authRepository.loginSuperAdmin(email, password)
   }
+
+  refreshToken(refreshToken: string): Promise<string> {
+    return this.authRepository.refreshToken(refreshToken)
+  }
 }
 
 const authRepository = AuthFactory()

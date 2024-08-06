@@ -5,7 +5,11 @@ import { AuthRepository } from "@interfaces/auth"
 import { Client, Employee, SuperAdmin, Tenant } from "@interfaces/types"
 import { hashPassword, comparePassword } from "@helpers/hashPassword"
 import { ErrorHandle } from "@helpers/Error"
-import { generateAccessToken } from "@helpers/generateJwt"
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyJWT,
+} from "@helpers/generateJwt"
 import SuperAdminModel from "@models/SuperAdmin"
 
 class MongoAuthRepository implements AuthRepository {
@@ -107,21 +111,31 @@ class MongoAuthRepository implements AuthRepository {
         throw ErrorHandle.unauthorized("Invalid credentials")
       }
 
-      const token = generateAccessToken({
+      const accessToken = generateAccessToken({
+        email: employee.email,
+        role: employee.role,
+        tenantId: employee.tenantId,
+      })
+      const refreshToken = generateRefreshToken({
         email: employee.email,
         role: employee.role,
         tenantId: employee.tenantId,
       })
 
+      if (!accessToken || !refreshToken) {
+        throw ErrorHandle.internal("Token generation failed")
+      }
+
       await EmployeeModel.updateOne(
         { _id: employee._id },
-        { accessToken: token }
+        { accessToken, refreshToken }
       ).exec()
 
       return {
         ...(employee.toJSON() as Omit<Employee, "password">),
         password: undefined,
-        accessToken: token,
+        accessToken,
+        refreshToken,
       }
     }
 
@@ -137,21 +151,32 @@ class MongoAuthRepository implements AuthRepository {
       throw ErrorHandle.unauthorized("Invalid credentials")
     }
 
-    const token = generateAccessToken({
+    const accessToken = generateAccessToken({
       email: tenant.email,
       role: tenant.role,
       tenantId: tenant.tenantId,
     })
 
+    const refreshToken = generateRefreshToken({
+      email: tenant.email,
+      role: tenant.role,
+      tenantId: tenant.tenantId,
+    })
+
+    if (!accessToken || !refreshToken) {
+      throw ErrorHandle.internal("Token generation failed")
+    }
+
     await TenantModel.updateOne(
       { _id: tenant._id },
-      { accessToken: token }
+      { accessToken, refreshToken }
     ).exec()
 
     return {
       ...(tenant.toJSON() as Omit<Tenant, "password">),
       password: undefined,
-      accessToken: token,
+      accessToken,
+      refreshToken,
     }
   }
 
@@ -176,23 +201,83 @@ class MongoAuthRepository implements AuthRepository {
       throw ErrorHandle.unauthorized("Invalid credentials")
     }
 
-    const token = generateAccessToken({
+    const accessToken = generateAccessToken({
       email: superAdmin.email,
       role: superAdmin.role,
     })
 
+    const refreshToken = generateRefreshToken({
+      email: superAdmin.email,
+      role: superAdmin.role,
+    })
+
+    if (!accessToken || !refreshToken) {
+      throw ErrorHandle.internal("Token generation failed")
+    }
+
     await SuperAdminModel.updateOne(
       { _id: superAdmin._id },
-      { accessToken: token }
+      { accessToken, refreshToken }
     ).exec()
 
     const superAdminWithoutPassword = {
       ...(superAdmin.toJSON() as Omit<SuperAdmin, "password">),
       password: undefined,
-      accessToken: token,
+      accessToken,
+      refreshToken,
     }
 
     return superAdminWithoutPassword
+  }
+
+  async refreshToken(refreshToken: string): Promise<string> {
+    const { payload, expired } = verifyJWT(refreshToken, true)
+
+    if (expired || !payload) {
+      throw ErrorHandle.unauthorized("Unauthorized")
+    }
+
+    const { email, role, tenantId } = payload
+
+    let user
+
+    if (role === "superAdmin") {
+      user = await SuperAdminModel.findOne({ email }).exec()
+    } else if (role === "tenant") {
+      user = await TenantModel.findOne({ email, tenantId }).exec()
+    } else if (role === "employee") {
+      user = await EmployeeModel.findOne({ email, tenantId }).exec()
+    } else {
+      user = await ClientModel.findOne({ email, tenantId }).exec()
+    }
+
+    if (!user) {
+      throw ErrorHandle.notFound("User not found")
+    }
+
+    if (user.refreshToken !== refreshToken) {
+      throw ErrorHandle.unauthorized("Unauthorized")
+    }
+
+    const accessToken = generateAccessToken({
+      email: user.email,
+      role: user.role,
+      tenantId: user.role !== "superAdmin" ? user.tenantId : undefined,
+    })
+
+    const newRefreshToken = generateRefreshToken({
+      email: user.email,
+      role: user.role,
+      tenantId: user.role !== "superAdmin" ? user.tenantId : undefined,
+    })
+
+    if (!accessToken || !newRefreshToken) {
+      throw ErrorHandle.internal("Token generation failed")
+    }
+
+    await user.updateOne({ accessToken, refreshToken: newRefreshToken }).exec()
+
+    return accessToken
   }
 }
 

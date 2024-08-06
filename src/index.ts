@@ -1,5 +1,7 @@
 import express, { Application } from "express"
 import cors from "cors"
+import cookieParser from "cookie-parser"
+import morgan from "morgan"
 import { AuthRoutes } from "@routes/authRoutes"
 import { connectToMongoDB } from "@config/mongo"
 import { EmployeesRoutes } from "@routes/employeesRoutes"
@@ -18,9 +20,16 @@ class Server {
   }
 
   private configureMiddlewares(): void {
+    this.app.use(
+      cors({
+        origin: "http://localhost:3000",
+        credentials: true,
+      })
+    )
     this.app.use(express.json())
     this.app.use(express.urlencoded({ extended: true }))
-    this.app.use(cors())
+    this.app.use(cookieParser())
+    this.app.use(morgan("dev"))
   }
 
   private configureRoutes(): void {
