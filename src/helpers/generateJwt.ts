@@ -33,8 +33,9 @@ export const verifyJWT = (
   isRefreshToken: boolean = false
 ): VerifyJWTResult => {
   try {
-    if (!JWT_SECRET || !JWT_REFRESH_SECRET)
+    if (!JWT_SECRET || !JWT_REFRESH_SECRET) {
       return { expired: false, payload: null }
+    }
     const secret = isRefreshToken ? JWT_REFRESH_SECRET : JWT_SECRET
     const payload = jwt.verify(token, secret) as JWTPayload
     return { expired: false, payload }

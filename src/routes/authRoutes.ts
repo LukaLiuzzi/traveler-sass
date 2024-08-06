@@ -4,6 +4,7 @@ import { validateSchema } from "middlewares/schemaValidator"
 import {
   EmployeeRegisterSchema,
   LoginSchema,
+  refreshTokenSchema,
   TenantRegisterSchema,
 } from "validationSchemas/authSchema"
 import { checkRole } from "middlewares/checkRole"
@@ -41,6 +42,7 @@ class AuthRoutes {
       validateSchema(LoginSchema),
       AuthController.loginSuperAdmin
     )
+    router.post("/refresh-token", AuthController.refreshToken)
     return router
   }
 }

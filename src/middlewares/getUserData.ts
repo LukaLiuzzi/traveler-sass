@@ -25,34 +25,43 @@ export const getUserData = async (
     return res.status(401).json({ error: "Unauthorized" })
   }
 
-  const { expired, payload } = verifyJWT(accessToken)
+  const { expired: accessExpired, payload: accessPayload } =
+    verifyJWT(accessToken)
 
-  // Si el accessToken es válido, proceder con la autenticación del usuario
-  if (payload) {
-    await authenticateUser(req, res, next, payload)
-  } else if (expired && refreshToken) {
-    // Si el accessToken ha expirado, verificar el refreshToken
-    const { payload: refreshPayload } = verifyJWT(refreshToken, true)
+  if (accessPayload && !accessExpired) {
+    // Si el accessToken es válido y no ha expirado, proceder con la autenticación del usuario
+    await authenticateUser(req, res, next, accessPayload)
+  } else if (accessExpired && refreshToken) {
+    // Verificar el refreshToken
+    const { expired: refreshExpired, payload: refreshPayload } = verifyJWT(
+      refreshToken,
+      true
+    )
 
-    if (!refreshPayload) {
+    if (!refreshPayload || refreshExpired) {
       return res.status(401).json({ error: "Unauthorized" })
     }
 
     // Generar un nuevo accessToken
-    const newAccessToken = generateAccessToken(refreshPayload)
+    const newAccessToken = generateAccessToken({
+      email: refreshPayload.email,
+      role: refreshPayload.role,
+      tenantId: refreshPayload.tenantId,
+    })
 
     if (!newAccessToken) {
       return res.status(500).json({ error: "Internal Server Error" })
     }
+
+    // Establecer una nueva cookie para el accessToken
+    res.cookie("accessToken", newAccessToken, { httpOnly: true })
+
     // Verificar el nuevo accessToken
     const { payload: newPayload } = verifyJWT(newAccessToken)
 
     if (!newPayload) {
       return res.status(401).json({ error: "Unauthorized" })
     }
-
-    // Establecer una nueva cookie para el accessToken
-    res.cookie("accessToken", newAccessToken, { httpOnly: true, secure: true })
 
     await authenticateUser(req, res, next, newPayload)
   } else {

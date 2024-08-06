@@ -27,3 +27,7 @@ export const TenantRegisterSchema = z.object({
   lastName: z.string(),
   phone: z.string(),
 })
+
+export const refreshTokenSchema = z.object({
+  refreshToken: z.string(),
+})
