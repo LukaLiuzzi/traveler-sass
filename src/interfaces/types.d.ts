@@ -121,10 +121,8 @@ export interface Payment {
 }
 
 export interface UserAccesses {
-  userId: string
+  userEmail: string
   tenantId: string
-  clientId: string
-  employeeId: string
   createdAt: Date
   ip: string
   userAgent: string

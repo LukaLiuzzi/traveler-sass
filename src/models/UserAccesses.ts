@@ -3,20 +3,15 @@ import { Schema, model, Document } from "mongoose"
 
 const UserAccessesSchema = new Schema(
   {
-    tenantId: { type: String, ref: "tenants", default: null },
-    clientId: { type: Schema.Types.ObjectId, ref: "clients", default: null },
-    employeeId: {
-      type: Schema.Types.ObjectId,
-      ref: "employees",
-      default: null,
-    },
+    userEmail: { type: String, required: true },
+    tenantId: { type: String },
     createdAt: { type: Date, default: Date.now },
-    ip: { type: String, default: null },
-    userAgent: { type: String, default: null },
-    location: { type: String, default: null },
-    device: { type: String, default: null },
-    browser: { type: String, default: null },
-    os: { type: String, default: null },
+    ip: { type: String },
+    userAgent: { type: String },
+    location: { type: String },
+    device: { type: String },
+    browser: { type: String },
+    os: { type: String },
   },
   { versionKey: false }
 )

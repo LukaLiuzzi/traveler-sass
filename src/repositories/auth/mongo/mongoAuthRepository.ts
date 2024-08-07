@@ -1,4 +1,5 @@
 import UserModel from "@models/UserModel"
+import UserAccessesModel from "@models/UserAccesses"
 import { AuthRepository } from "@interfaces/auth"
 import { Client, Employee, SuperAdmin, Tenant } from "@interfaces/types"
 import { hashPassword, comparePassword } from "@helpers/hashPassword"
@@ -8,7 +9,6 @@ import {
   generateRefreshToken,
   verifyJWT,
 } from "@helpers/generateJwt"
-import SuperAdminModel from "@models/SuperAdmin"
 
 class MongoAuthRepository implements AuthRepository {
   async createTenant(user: Partial<Tenant>): Promise<Partial<Tenant>> {
@@ -128,6 +128,17 @@ class MongoAuthRepository implements AuthRepository {
       { _id: user._id },
       { accessToken, refreshToken }
     ).exec()
+
+    await UserAccessesModel.create({
+      userEmail: user.email,
+      tenantId: user.tenantId,
+      ip: null,
+      userAgent: null,
+      location: null,
+      device: null,
+      browser: null,
+      os: null,
+    })
 
     return {
       ...(user.toJSON() as Omit<Employee, "password">),

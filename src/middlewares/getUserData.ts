@@ -1,6 +1,7 @@
 import { MyRequest, MyResponse } from "@interfaces/http"
 import { NextFunction } from "express"
 import UserModel from "@models/UserModel"
+import UserAccessesModel from "@models/UserAccesses"
 import {
   verifyJWT,
   generateAccessToken,
@@ -48,6 +49,17 @@ export const getUserData = async (
     if (!newAccessToken) {
       return res.status(500).json({ error: "Internal Server Error" })
     }
+
+    await UserAccessesModel.create({
+      userEmail: refreshPayload.email,
+      tenantId: refreshPayload.tenantId,
+      ip: req.ip,
+      userAgent: req.headers["user-agent"],
+      location: req.headers["cf-ipcountry"],
+      device: null,
+      browser: null,
+      os: null,
+    })
 
     // Establecer una nueva cookie para el accessToken
     res.cookie("accessToken", newAccessToken, { httpOnly: true })
