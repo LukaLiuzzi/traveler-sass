@@ -7,6 +7,7 @@ import { connectToMongoDB } from "@config/mongo"
 import { EmployeesRoutes } from "@routes/employeesRoutes"
 import { ClientsRoutes } from "@routes/clientsRoutes"
 import { PaymentsRoutes } from "@routes/paymentsRoutes"
+import { getRequestMetadata } from "middlewares/getRequestMetadata"
 
 class Server {
   public app: Application
@@ -29,6 +30,7 @@ class Server {
     this.app.use(cookieParser())
     this.app.use(express.json())
     this.app.use(express.urlencoded({ extended: true }))
+    this.app.use(getRequestMetadata)
     this.app.use(morgan("dev"))
   }
 

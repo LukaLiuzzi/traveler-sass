@@ -54,11 +54,11 @@ export const getUserData = async (
       userEmail: refreshPayload.email,
       tenantId: refreshPayload.tenantId,
       ip: req.ip,
-      userAgent: req.headers["user-agent"],
-      location: req.headers["cf-ipcountry"],
-      device: null,
-      browser: null,
-      os: null,
+      userAgent: req.userAgent,
+      location: req.location,
+      device: req.device,
+      browser: req.browser,
+      os: req.os,
     })
 
     // Establecer una nueva cookie para el accessToken
