@@ -1,8 +1,8 @@
 import { Request, Response } from "express"
-import { SuperAdmin, User } from "./types"
+import { CompleteUser } from "./types"
 
 export interface MyRequest extends Request {
-  user?: User | SuperAdmin | null
+  user?: CompleteUser
   tenantId?: string
   isSuperAdmin?: boolean
 }

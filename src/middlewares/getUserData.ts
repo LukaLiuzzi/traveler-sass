@@ -1,13 +1,9 @@
 import { MyRequest, MyResponse } from "@interfaces/http"
 import { NextFunction } from "express"
-import TenantModel from "@models/TenantModel"
-import EmployeeModel from "@models/EmployeeModel"
-import ClientModel from "@models/ClientModel"
-import SuperAdminModel from "@models/SuperAdmin"
+import UserModel from "@models/UserModel"
 import {
   verifyJWT,
   generateAccessToken,
-  generateRefreshToken,
   JWTPayload,
 } from "@helpers/generateJwt"
 
@@ -76,31 +72,9 @@ const authenticateUser = async (
   next: NextFunction,
   payload: JWTPayload
 ) => {
-  const { email, role, tenantId } = payload
+  const { email, role } = payload
   try {
-    let user
-
-    switch (role) {
-      case "superAdmin":
-        user = await SuperAdminModel.findOne({ email }).exec()
-        if (user) {
-          req.isSuperAdmin = true
-          req.user = user
-          return next()
-        }
-        break
-      case "tenant":
-        user = await TenantModel.findOne({ email, tenantId }).exec()
-        break
-      case "client":
-        user = await ClientModel.findOne({ email, tenantId }).exec()
-        break
-      case "employee":
-        user = await EmployeeModel.findOne({ email, tenantId }).exec()
-        break
-      default:
-        return res.status(400).json({ error: "Invalid role" })
-    }
+    const user = await UserModel.findOne({ email, role })
 
     if (!user) {
       return res.status(404).json({ error: "User not found" })

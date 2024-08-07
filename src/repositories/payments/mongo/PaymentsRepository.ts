@@ -1,4 +1,4 @@
-import ClientModel from "@models/ClientModel"
+import UserModel from "@models/UserModel"
 import PaymentModel from "@models/paymentModel"
 import {
   PaymentsRepository as PaymentsRepositoryType,
@@ -24,7 +24,11 @@ class PaymentsRepository implements PaymentsRepositoryType {
     }
 
     if (clientId) {
-      const client = await ClientModel.findOne({ _id: clientId, tenantId })
+      const client = await UserModel.findOne({
+        _id: clientId,
+        tenantId,
+        role: "client",
+      })
 
       if (!client) {
         throw new ErrorHandle("Client not found", 404)
@@ -46,7 +50,11 @@ class PaymentsRepository implements PaymentsRepositoryType {
     clientId: string,
     tenantId: string
   ): Promise<GetPaymentsResponse> {
-    const client = await ClientModel.findOne({ _id: clientId, tenantId })
+    const client = await UserModel.findOne({
+      _id: clientId,
+      tenantId,
+      role: "client",
+    })
 
     if (!client) {
       throw new ErrorHandle("Client not found", 404)
@@ -65,7 +73,11 @@ class PaymentsRepository implements PaymentsRepositoryType {
     clientId: string,
     tenantId: string
   ): Promise<Payment> {
-    const client = await ClientModel.findOne({ _id: clientId, tenantId })
+    const client = await UserModel.findOne({
+      _id: clientId,
+      tenantId,
+      role: "client",
+    })
 
     if (!client) {
       throw new ErrorHandle("Client not found", 404)

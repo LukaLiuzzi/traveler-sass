@@ -1,6 +1,4 @@
-import TenantModel from "@models/TenantModel"
-import EmployeeModel from "@models/EmployeeModel"
-import ClientModel from "@models/ClientModel"
+import UserModel from "@models/UserModel"
 import { AuthRepository } from "@interfaces/auth"
 import { Client, Employee, SuperAdmin, Tenant } from "@interfaces/types"
 import { hashPassword, comparePassword } from "@helpers/hashPassword"
@@ -14,7 +12,7 @@ import SuperAdminModel from "@models/SuperAdmin"
 
 class MongoAuthRepository implements AuthRepository {
   async createTenant(user: Partial<Tenant>): Promise<Partial<Tenant>> {
-    const userExists = await TenantModel.findOne({ email: user.email }).exec()
+    const userExists = await UserModel.findOne({ email: user.email }).exec()
 
     if (userExists) {
       throw ErrorHandle.conflict("User already exists")
@@ -22,7 +20,7 @@ class MongoAuthRepository implements AuthRepository {
 
     const hashedPassword = await hashPassword(user.password!)
 
-    const newUser = await TenantModel.create({
+    const newUser = await UserModel.create({
       ...user,
       role: "tenant",
       password: hashedPassword,
@@ -40,7 +38,7 @@ class MongoAuthRepository implements AuthRepository {
     user: Partial<Employee>,
     tenantId: string
   ): Promise<Partial<Employee>> {
-    const userExists = await EmployeeModel.findOne({
+    const userExists = await UserModel.findOne({
       email: user.email,
       tenantId,
     }).exec()
@@ -51,7 +49,7 @@ class MongoAuthRepository implements AuthRepository {
 
     const hashedPassword = await hashPassword(user.password!)
 
-    const newUser = await EmployeeModel.create({
+    const newUser = await UserModel.create({
       ...user,
       password: hashedPassword,
       tenantId,
@@ -69,7 +67,7 @@ class MongoAuthRepository implements AuthRepository {
     client: Partial<Client>,
     tenantId: string
   ): Promise<Partial<Client>> {
-    const clientExists = await ClientModel.findOne({
+    const clientExists = await UserModel.findOne({
       email: client.email,
       tenantId,
     }).exec()
@@ -80,7 +78,7 @@ class MongoAuthRepository implements AuthRepository {
 
     const hashedPassword = await hashPassword(client.password!)
 
-    const newClient = await ClientModel.create({
+    const newClient = await UserModel.create({
       ...client,
       password: hashedPassword,
       tenantId,
@@ -99,81 +97,40 @@ class MongoAuthRepository implements AuthRepository {
     password: string,
     tenantId: string
   ): Promise<Partial<Tenant> | Partial<Employee>> {
-    const employee = await EmployeeModel.findOne({ email, tenantId }).exec()
+    const user = await UserModel.findOne({ email, tenantId }).exec()
 
-    if (employee) {
-      const isPasswordCorrect = await comparePassword(
-        password,
-        employee.password
-      )
-
-      if (!isPasswordCorrect) {
-        throw ErrorHandle.unauthorized("Invalid credentials")
-      }
-
-      const accessToken = generateAccessToken({
-        email: employee.email,
-        role: employee.role,
-        tenantId: employee.tenantId,
-      })
-      const refreshToken = generateRefreshToken({
-        email: employee.email,
-        role: employee.role,
-        tenantId: employee.tenantId,
-      })
-
-      if (!accessToken || !refreshToken) {
-        throw ErrorHandle.internal("Token generation failed")
-      }
-
-      await EmployeeModel.updateOne(
-        { _id: employee._id },
-        { accessToken, refreshToken }
-      ).exec()
-
-      return {
-        ...(employee.toJSON() as Omit<Employee, "password">),
-        password: undefined,
-        accessToken,
-        refreshToken,
-      }
-    }
-
-    const tenant = await TenantModel.findOne({ email, tenantId }).exec()
-
-    if (!tenant) {
+    if (!user) {
       throw ErrorHandle.unauthorized("Invalid credentials")
     }
 
-    const isPasswordCorrect = await comparePassword(password, tenant.password)
+    const isPasswordCorrect = await comparePassword(password, user.password)
 
     if (!isPasswordCorrect) {
       throw ErrorHandle.unauthorized("Invalid credentials")
     }
 
     const accessToken = generateAccessToken({
-      email: tenant.email,
-      role: tenant.role,
-      tenantId: tenant.tenantId,
+      email: user.email,
+      role: user.role,
+      tenantId: user.tenantId,
     })
-
     const refreshToken = generateRefreshToken({
-      email: tenant.email,
-      role: tenant.role,
-      tenantId: tenant.tenantId,
+      email: user.email,
+      role: user.role,
+      tenantId: user.tenantId,
     })
 
     if (!accessToken || !refreshToken) {
       throw ErrorHandle.internal("Token generation failed")
     }
 
-    await TenantModel.updateOne(
-      { _id: tenant._id },
+    await UserModel.updateOne(
+      { _id: user._id },
       { accessToken, refreshToken }
     ).exec()
 
     return {
-      ...(tenant.toJSON() as Omit<Tenant, "password">),
+      ...(user.toJSON() as Omit<Employee, "password">),
       password: undefined,
       accessToken,
       refreshToken,
@@ -184,7 +141,7 @@ class MongoAuthRepository implements AuthRepository {
     email: string,
     password: string
   ): Promise<Partial<SuperAdmin>> {
-    const superAdmin = await SuperAdminModel.findOne({
+    const superAdmin = await UserModel.findOne({
       email,
     }).exec()
 
@@ -215,7 +172,7 @@ class MongoAuthRepository implements AuthRepository {
       throw ErrorHandle.internal("Token generation failed")
     }
 
-    await SuperAdminModel.updateOne(
+    await UserModel.updateOne(
       { _id: superAdmin._id },
       { accessToken, refreshToken }
     ).exec()
@@ -239,17 +196,7 @@ class MongoAuthRepository implements AuthRepository {
 
     const { email, role, tenantId } = payload
 
-    let user
-
-    if (role === "superAdmin") {
-      user = await SuperAdminModel.findOne({ email }).exec()
-    } else if (role === "tenant") {
-      user = await TenantModel.findOne({ email, tenantId }).exec()
-    } else if (role === "employee") {
-      user = await EmployeeModel.findOne({ email, tenantId }).exec()
-    } else {
-      user = await ClientModel.findOne({ email, tenantId }).exec()
-    }
+    const user = await UserModel.findOne({ email }).exec()
 
     if (!user) {
       throw ErrorHandle.notFound("User not found")

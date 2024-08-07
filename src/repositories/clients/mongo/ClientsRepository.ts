@@ -1,4 +1,4 @@
-import ClientModel from "@models/ClientModel"
+import UserModel from "@models/UserModel"
 import {
   ClientsRepository as ClientsRepositoryType,
   GetClientsParams,
@@ -14,8 +14,13 @@ class ClientsRepository implements ClientsRepositoryType {
     tenantId,
     query,
   }: GetClientsParams): Promise<GetClientsResponse> {
-    const clients = await ClientModel.paginate(
-      { ...query, tenantId },
+    const clients = await UserModel.paginate(
+      {
+        ...query,
+        tenantId,
+        role: "client",
+        status: { $ne: "deleted" },
+      },
       { page, limit }
     )
 
@@ -23,13 +28,17 @@ class ClientsRepository implements ClientsRepositoryType {
   }
 
   async getClientById(id: string, tenantId: string): Promise<Client> {
-    const client = await ClientModel.findOne({ _id: id, tenantId })
+    const client = await UserModel.findOne({
+      _id: id,
+      tenantId,
+      role: "client",
+    })
 
     if (!client) {
       throw new ErrorHandle("Client not found", 404)
     }
 
-    return client
+    return client as unknown as Client
   }
 
   async updateClient(
@@ -37,8 +46,8 @@ class ClientsRepository implements ClientsRepositoryType {
     id: string,
     tenantId: string
   ): Promise<Client> {
-    const updatedClient = await ClientModel.findOneAndUpdate(
-      { _id: id, tenantId },
+    const updatedClient = await UserModel.findOneAndUpdate(
+      { _id: id, tenantId, role: "client" },
       { ...client, updatedAt: new Date() },
       { new: true }
     )
@@ -47,12 +56,12 @@ class ClientsRepository implements ClientsRepositoryType {
       throw new ErrorHandle("Client not found", 404)
     }
 
-    return updatedClient
+    return updatedClient as unknown as Client
   }
 
   async deleteClient(id: string, tenantId: string): Promise<boolean> {
-    const deletedClient = await ClientModel.findOneAndUpdate(
-      { _id: id, tenantId },
+    const deletedClient = await UserModel.findOneAndUpdate(
+      { _id: id, tenantId, role: "client" },
       { deletedAt: new Date(), status: "deleted" }
     )
 

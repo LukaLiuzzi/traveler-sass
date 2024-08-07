@@ -82,6 +82,14 @@ class AuthController {
     try {
       const { email, password } = req.body
       const user = await authService.loginSuperAdmin(email, password)
+
+      res.cookie("accessToken", user.accessToken, {
+        httpOnly: true,
+      })
+      res.cookie("refreshToken", user.refreshToken, {
+        httpOnly: true,
+      })
+
       res.status(200).json(user)
     } catch (error) {
       if (error instanceof ErrorHandle) {

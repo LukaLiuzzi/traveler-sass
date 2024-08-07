@@ -17,6 +17,35 @@ interface User {
   phone: string
 }
 
+export interface CompleteUser {
+  email: string
+  password: string
+  name: string
+  lastName: string
+  createdAt: Date
+  updatedAt: Date
+  deletedAt: boolean
+  accessToken: string
+  refreshToken: string
+  status: "active" | "inactive" | "deleted"
+  role:
+    | "admin"
+    | "support"
+    | "sales"
+    | "finance"
+    | "client"
+    | "tenant"
+    | "superAdmin"
+  tenantId: string
+  phone: string
+  proccessStatus: string
+  planId: string
+  address: string
+  maritalStatus: string
+  children: number
+  occupation: string
+}
+
 export interface Tenant extends User {
   role: "tenant"
 }

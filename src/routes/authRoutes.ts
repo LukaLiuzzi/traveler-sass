@@ -17,22 +17,22 @@ class AuthRoutes {
   static init() {
     router.post(
       "/register/tenant",
-      validateSchema(TenantRegisterSchema),
       getUserData,
+      validateSchema(TenantRegisterSchema),
       checkRole(["superAdmin"]),
       AuthController.createTenant
     )
     router.post(
       "/register/employee",
-      validateSchema(EmployeeRegisterSchema),
       getUserData,
+      validateSchema(EmployeeRegisterSchema),
       checkRole(["superAdmin", "tenant"]),
       AuthController.createEmployee
     )
     router.post(
       "/register/client",
-      validateSchema(ClientRegisterSchema),
       getUserData,
+      validateSchema(ClientRegisterSchema),
       checkRole(["superAdmin", "tenant", "admin", "sales"]),
       AuthController.createClient
     )

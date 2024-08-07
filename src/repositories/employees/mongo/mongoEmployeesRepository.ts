@@ -1,4 +1,4 @@
-import EmployeeModel from "@models/EmployeeModel"
+import UserModel from "@models/UserModel"
 import {
   EmployeesRepository,
   GetEmployeesParams,
@@ -14,10 +14,11 @@ class MongoEmployeesRepository implements EmployeesRepository {
     tenantId,
     query,
   }: GetEmployeesParams): Promise<GetEmployeesResponse> {
-    const employees = await EmployeeModel.paginate(
+    const employees = await UserModel.paginate(
       {
         ...query,
         tenantId,
+        role: { $in: ["admin", "sales", "support", "finance"] },
         status: { $ne: "deleted" },
       },
       {
@@ -31,7 +32,11 @@ class MongoEmployeesRepository implements EmployeesRepository {
   }
 
   async getEmployeeById(id: string, tenantId: string): Promise<Employee> {
-    const employee = await EmployeeModel.findOne({ _id: id, tenantId })
+    const employee = await UserModel.findOne({
+      _id: id,
+      tenantId,
+      role: { $in: ["admin", "sales", "support", "finance"] },
+    })
       .select("-password")
       .exec()
 
@@ -39,7 +44,7 @@ class MongoEmployeesRepository implements EmployeesRepository {
       throw ErrorHandle.notFound("Employee not found")
     }
 
-    return employee
+    return employee as unknown as Employee
   }
 
   async updateEmployee(
@@ -47,8 +52,12 @@ class MongoEmployeesRepository implements EmployeesRepository {
     id: string,
     tenantId: string
   ): Promise<Employee> {
-    const updatedEmployee = await EmployeeModel.findOneAndUpdate(
-      { _id: id, tenantId },
+    const updatedEmployee = await UserModel.findOneAndUpdate(
+      {
+        _id: id,
+        tenantId,
+        role: { $in: ["admin", "sales", "support", "finance"] },
+      },
       {
         ...employee,
         updatedAt: new Date(),
@@ -62,12 +71,16 @@ class MongoEmployeesRepository implements EmployeesRepository {
       throw ErrorHandle.notFound("Employee not found")
     }
 
-    return updatedEmployee
+    return updatedEmployee as unknown as Employee
   }
 
   async deleteEmployee(id: string, tenantId: string): Promise<boolean> {
-    const deletedEmployee = await EmployeeModel.findOneAndUpdate(
-      { _id: id, tenantId },
+    const deletedEmployee = await UserModel.findOneAndUpdate(
+      {
+        _id: id,
+        tenantId,
+        role: { $in: ["admin", "sales", "support", "finance"] },
+      },
       { deletedAt: new Date(), status: "deleted" },
       { new: true }
     ).exec()

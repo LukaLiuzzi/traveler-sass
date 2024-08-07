@@ -11,12 +11,7 @@ export const EmployeeRegisterSchema = z.object({
   name: z.string(),
   lastName: z.string(),
   phone: z.string(),
-  role: z.union([
-    z.literal("admin"),
-    z.literal("support"),
-    z.literal("sales"),
-    z.literal("finance"),
-  ]),
+  role: z.enum(["admin", "sales", "support", "finance"]),
   tenantId: z.string(),
 })
 
@@ -26,6 +21,7 @@ export const TenantRegisterSchema = z.object({
   name: z.string(),
   lastName: z.string(),
   phone: z.string(),
+  role: z.enum(["tenant"]),
 })
 
 export const refreshTokenSchema = z.object({
