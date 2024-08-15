@@ -33,7 +33,6 @@ class MongoEmployeesRepository implements EmployeesRepository {
         ...searchFilter,
         tenantId,
         role: { $in: ["admin", "sales", "support", "finance"] },
-        status: { $ne: "deleted" },
       },
       {
         page,
