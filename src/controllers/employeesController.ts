@@ -6,22 +6,16 @@ import { GetEmployeesQuery } from "@interfaces/employees"
 class EmployeesController {
   static async getEmployees(req: MyRequest, res: MyResponse): Promise<void> {
     try {
-      const { page, limit, name, email, role } = req.query
+      const { page, limit, search } = req.query
       const { tenantId } = req
       if (!tenantId) {
         throw ErrorHandle.badRequest("TenantId is required")
       }
 
-      const query: GetEmployeesQuery = {
-        ...(name && { name: name as string }),
-        ...(email && { email: email as string }),
-        ...(role && { role: role as string }),
-      }
-
       const employees = await employeesService.getEmployees({
         page: page ? parseInt(page as string) : 1,
         limit: limit ? parseInt(limit as string) : 50,
-        query,
+        search: search ? (search as string) : "",
         tenantId,
       })
       res.status(200).json(employees)

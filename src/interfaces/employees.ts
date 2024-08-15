@@ -9,7 +9,7 @@ export interface GetEmployeesParams {
   page?: number
   limit?: number
   tenantId: string
-  query?: GetEmployeesQuery
+  search?: string
 }
 
 export interface GetEmployeesResponse {
@@ -29,7 +29,7 @@ export interface EmployeesRepository {
     page,
     limit,
     tenantId,
-    query,
+    search,
   }: GetEmployeesParams) => Promise<GetEmployeesResponse>
   getEmployeeById: (id: string, tenantId: string) => Promise<Employee>
   updateEmployee: (

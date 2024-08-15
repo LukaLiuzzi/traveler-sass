@@ -12,11 +12,25 @@ class MongoEmployeesRepository implements EmployeesRepository {
     page = 1,
     limit = 50,
     tenantId,
-    query,
+    search,
   }: GetEmployeesParams): Promise<GetEmployeesResponse> {
+    // Construir el filtro de búsqueda
+    let searchFilter = {}
+
+    if (search) {
+      searchFilter = {
+        $or: [
+          { email: { $regex: search, $options: "i" } },
+          { firstName: { $regex: search, $options: "i" } },
+          { lastName: { $regex: search, $options: "i" } },
+          { role: { $regex: search, $options: "i" } },
+        ],
+      }
+    }
+
     const employees = await UserModel.paginate(
       {
-        ...query,
+        ...searchFilter,
         tenantId,
         role: { $in: ["admin", "sales", "support", "finance"] },
         status: { $ne: "deleted" },
@@ -30,7 +44,6 @@ class MongoEmployeesRepository implements EmployeesRepository {
 
     return employees as unknown as GetEmployeesResponse
   }
-
   async getEmployeeById(id: string, tenantId: string): Promise<Employee> {
     const employee = await UserModel.findOne({
       _id: id,
