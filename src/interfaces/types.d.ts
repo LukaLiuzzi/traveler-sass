@@ -8,7 +8,6 @@ interface User {
   createdAt: Date
   deletedAt: Date
   updatedAt: Date
-  deletedAt: boolean
   accessToken: string
   refreshToken: string
   status: "active" | "inactive" | "deleted"
