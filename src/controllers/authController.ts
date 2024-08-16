@@ -25,7 +25,7 @@ class AuthController {
         throw ErrorHandle.badRequest("TenantId is required")
       }
       const user = await authService.createEmployee(req.body, tenantId)
-      res.status(200).json(user)
+      res.status(201).json(user)
     } catch (error) {
       if (error instanceof ErrorHandle) {
         res.status(error.statusCode).json({ error: error.message })
@@ -43,7 +43,7 @@ class AuthController {
       }
 
       const user = await authService.createClient(req.body, tenantId)
-      res.status(200).json(user)
+      res.status(201).json(user)
     } catch (error) {
       if (error instanceof ErrorHandle) {
         res.status(error.statusCode).json({ error: error.message })
