@@ -19,7 +19,6 @@ class ClientsRepository implements ClientsRepositoryType {
         ...query,
         tenantId,
         role: "client",
-        status: { $ne: "deleted" },
       },
       { page, limit }
     )
